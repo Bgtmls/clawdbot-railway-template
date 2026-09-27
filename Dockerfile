@@ -80,4 +80,7 @@ EXPOSE 8080
 
 # Ensure PID 1 reaps zombies and forwards signals.
 ENTRYPOINT ["tini", "--"]
-CMD ["node", "src/server.js"]
+# OpenClaw 2026.9.x migrates legacy auth profiles into SQLite via doctor --fix.
+# Run the idempotent migration before the wrapper starts so upgrades from older
+# Railway volumes do not crash the Gateway with AUTH_PROFILE_MIGRATION_REQUIRED.
+CMD ["bash", "-lc", "echo '[wrapper] running OpenClaw doctor --fix before startup...' && openclaw doctor --fix && exec node src/server.js"]
